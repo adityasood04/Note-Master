@@ -12,7 +12,9 @@ import androidx.navigation.fragment.findNavController
 import com.example.notemaster.databinding.FragmentRegisterBinding
 import com.example.notemaster.models.UserRequest
 import com.example.notemaster.utils.NetworkResult
+import com.example.notemaster.utils.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class registerFragment : Fragment() {
@@ -20,12 +22,16 @@ class registerFragment : Fragment() {
     private val binding get() = _binding!!
     private val authViewModel by viewModels<AuthViewModel>()
 
+    @Inject
+    lateinit var tokenManager: TokenManager
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
-
+        if (tokenManager.getToken() != null) {
+            findNavController().navigate(R.id.action_registerFragment_to_mainFragment)
+        }
         binding.btnSignUp.setOnClickListener {
         }
         return binding.root
@@ -57,8 +63,10 @@ class registerFragment : Fragment() {
             )
         }
     }
+
     private fun showValidationErrors(error: String) {
-        binding.txtError.text = String.format(resources.getString(R.string.txt_error_message, error))
+        binding.txtError.text =
+            String.format(resources.getString(R.string.txt_error_message, error))
     }
 
 
@@ -66,6 +74,7 @@ class registerFragment : Fragment() {
         authViewModel.userResponseLiveData.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is NetworkResult.Success -> {
+                    tokenManager.saveToken(it.data!!.token)
                     findNavController().navigate(R.id.action_registerFragment_to_mainFragment)
                 }
 
