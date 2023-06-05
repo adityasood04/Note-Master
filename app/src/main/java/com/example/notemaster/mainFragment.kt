@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -19,9 +21,8 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class mainFragment : Fragment() {
-    private var _binding:FragmentMainBinding? = null
+    private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
-
     private val noteViewModel by viewModels<NoteViewModel>()
     private lateinit var noteAdapter: NoteAdapter
     override fun onCreateView(
@@ -29,30 +30,34 @@ class mainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _binding = FragmentMainBinding.inflate(inflater,container,false)
+        _binding = FragmentMainBinding.inflate(inflater, container, false)
         noteAdapter = NoteAdapter(::onNoteClicked)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bindObservers()
         noteViewModel.getAllNotes()
-        binding.noteList.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        binding.noteList.layoutManager =
+            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.noteList.adapter = noteAdapter
-        binding.addNote.setOnClickListener{
+        binding.addNote.setOnClickListener {
             findNavController().navigate(R.id.action_mainFragment_to_noteFragment)
         }
+        bindObservers()
+
     }
 
     private fun bindObservers() {
         noteViewModel.notesLiveData.observe(viewLifecycleOwner, Observer {
-            when(it){
-                is NetworkResult.Success ->{
+            binding.progressBar.isVisible = false
+            when (it) {
+                is NetworkResult.Success -> {
                     noteAdapter.submitList(it.data)
                 }
                 is NetworkResult.Error -> {
-                    Toast.makeText(requireContext(), it.message.toString(), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), it.message.toString(), Toast.LENGTH_SHORT)
+                        .show()
                 }
                 is NetworkResult.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE
@@ -61,12 +66,13 @@ class mainFragment : Fragment() {
         })
     }
 
-    private fun onNoteClicked(noteResponse: NoteResponse){
+    private fun onNoteClicked(noteResponse: NoteResponse) {
         val bundle = Bundle()
         bundle.putString("note", Gson().toJson(noteResponse))
         findNavController().navigate(R.id.action_mainFragment_to_noteFragment, bundle)
 
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -21,6 +21,6 @@ interface NoteApi {
     @PUT("/note/{noteId}")
     suspend fun updateNote(@Path("noteId") noteId:String,@Body noteRequest: NoteRequest):Response<NoteResponse>
 
-    @DELETE("note/{noteId")
+    @DELETE("note/{noteId}")
     suspend fun deleteNote(@Path("noteId") noteId:String):Response<NoteResponse>
 }

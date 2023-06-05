@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
@@ -77,7 +78,7 @@ class LoginFragment : Fragment() {
 
     private fun bindObservers() {
         authViewModel.userResponseLiveData.observe(viewLifecycleOwner, Observer {
-//            binding.progressBar.isVisible = false
+            binding.progressBar.isVisible = false
             when (it) {
                 is NetworkResult.Success -> {
                     tokenManager.saveToken(it.data!!.token)
@@ -89,7 +90,7 @@ class LoginFragment : Fragment() {
                 }
 
                 is NetworkResult.Loading -> {
-//                    binding.progressBar.isVisible = true
+                    binding.progressBar.isVisible = true
                 }
             }
         })

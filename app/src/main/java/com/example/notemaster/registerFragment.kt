@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -32,8 +33,7 @@ class registerFragment : Fragment() {
         if (tokenManager.getToken() != null) {
             findNavController().navigate(R.id.action_registerFragment_to_mainFragment)
         }
-        binding.btnSignUp.setOnClickListener {
-        }
+
         return binding.root
     }
 
@@ -43,14 +43,16 @@ class registerFragment : Fragment() {
         binding.btnLogin.setOnClickListener {
             findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
         }
-        val validationResult = validateUserInput()
-        if (validationResult.first) {
-            val userRequest = getUserRequest()
-            authViewModel.registerUser(userRequest)
-        } else {
-            showValidationErrors(validationResult.second)
-        }
+        binding.btnSignUp.setOnClickListener {
+            val validationResult = validateUserInput()
+            if (validationResult.first) {
+                val userRequest = getUserRequest()
+                authViewModel.registerUser(userRequest)
+            } else {
+                showValidationErrors(validationResult.second)
+            }
 
+        }
         bindObservers()
     }
 
@@ -72,6 +74,7 @@ class registerFragment : Fragment() {
 
     private fun bindObservers() {
         authViewModel.userResponseLiveData.observe(viewLifecycleOwner, Observer {
+            binding.progressBar.isVisible = false
             when (it) {
                 is NetworkResult.Success -> {
                     tokenManager.saveToken(it.data!!.token)
@@ -82,7 +85,9 @@ class registerFragment : Fragment() {
                     binding.txtError.text = it.message
                 }
 
-                is NetworkResult.Loading -> {}
+                is NetworkResult.Loading -> {
+                    binding.progressBar.isVisible = true
+                }
             }
         })
     }

@@ -12,7 +12,7 @@ interface UserApi {
     @POST("/users/signup")
     suspend fun signUp(@Body userRequest: UserRequest): Response<UserResponse>
 
-    @GET("users/signin")
+    @POST("users/signin")
     suspend fun signIn(@Body userRequest: UserRequest): Response<UserResponse>
 
 }
