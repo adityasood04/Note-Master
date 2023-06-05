@@ -15,7 +15,9 @@ import com.example.notemaster.databinding.FragmentMainBinding
 import com.example.notemaster.models.NoteResponse
 import com.example.notemaster.utils.NetworkResult
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class mainFragment : Fragment() {
     private var _binding:FragmentMainBinding? = null
     private val binding get() = _binding!!
@@ -38,6 +40,9 @@ class mainFragment : Fragment() {
         noteViewModel.getAllNotes()
         binding.noteList.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         binding.noteList.adapter = noteAdapter
+        binding.addNote.setOnClickListener{
+            findNavController().navigate(R.id.action_mainFragment_to_noteFragment)
+        }
     }
 
     private fun bindObservers() {
@@ -59,7 +64,7 @@ class mainFragment : Fragment() {
     private fun onNoteClicked(noteResponse: NoteResponse){
         val bundle = Bundle()
         bundle.putString("note", Gson().toJson(noteResponse))
-        findNavController().navigate(R.id.action_mainFragment_to_noteFragment)
+        findNavController().navigate(R.id.action_mainFragment_to_noteFragment, bundle)
 
     }
     override fun onDestroyView() {
